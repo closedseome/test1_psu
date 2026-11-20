@@ -1,42 +1,33 @@
 from entities import Player, Enemy
 from cards import StrikeCard, ShieldCard, HeavyBlowCard
 from engine import BattleEngine
+from ui import GameUI
 
 def generate_enemies(count: int) -> list[Enemy]:
-    """Генерирует список из N врагов. Сюда можно легко встроить босса на последний этап."""
     enemies = []
     for i in range(1, count + 1):
-        # С каждым шагом враги становятся немного сильнее
-        enemies.append(Enemy(name=f"Скелет-воин #{i}", max_hp=15 + i * 5, base_damage=4 + i))
-    
-    # МЕСТО ДЛЯ ВТОРОГО РАЗРАБОТЧИКА: Можно заменить последнего врага на Босса
-    # enemies[-1] = GoblinBoss("Король Гоблинов", max_hp=50, base_damage=10)
+        enemies.append(Enemy(name=f"Скелет #{i}", max_hp=15 + i * 5, base_damage=4 + i))
     return enemies
 
 def main():
-    print("Добро пожаловать в Dice & Cards!")
-    player = Player(name="Искатель приключений", max_hp=50)
+    ui = GameUI()
+    ui.clear()
+    ui.show_message("Добро пожаловать в GRIM ROLL!")
     
-    # Стартовая колода
-    player.deck = [
-        StrikeCard(),
-        ShieldCard(),
-        HeavyBlowCard()
-    ]
+    player = Player(name="Искатель", max_hp=50)
+    player.deck = [StrikeCard(), ShieldCard(), HeavyBlowCard()]
 
-    enemies_to_defeat = 3  # Цель: победить N врагов
+    enemies_to_defeat = 3
     enemies = generate_enemies(enemies_to_defeat)
 
     for idx, enemy in enumerate(enemies, 1):
-        print(f"\n>>> Этап {idx} из {enemies_to_defeat} <<<")
-        battle = BattleEngine(player, enemy)
-        won = battle.start_battle()
-
-        if not won:
-            print("\nВЫ ПОГИБЛИ. Игра окончена.")
+        ui.show_message(f"Этап {idx} из {enemies_to_defeat}")
+        battle = BattleEngine(player, enemy, ui)
+        if not battle.start_battle():
+            ui.show_message("ВЫ ПОГИБЛИ. Игра окончена.", pause=2.5)
             return
 
-    print("\nПОЗДРАВЛЯЕМ! Вы победили всех врагов и прошли игру!")
+    ui.show_message("ПОБЕДА! Все враги повержены!", pause=3.0)
 
 if __name__ == "__main__":
     main()
